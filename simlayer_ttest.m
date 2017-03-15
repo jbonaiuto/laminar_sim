@@ -169,9 +169,9 @@ for simmeshind=1:length(simmeshes)
         end
         [a,b]=spm_jobman('run', matlabbatch);
         
+        % Copy forward model from pial/white coregistered file
         simfilename=fullfile(out_path,sprintf('%s%s_%d.mat',prefix,subj_info.subj_id,session_num));
         sim=load(simfilename);
-
         sim.D.other=greycoreg.D.other;
         D=sim.D;
         copyfile(fullfile(out_path, sprintf('SPMgainmatrix_%s_%d_greycoreg_1.mat', subj_info.subj_id, session_num)), fullfile(out_path, sprintf('SPMgainmatrix_%s%s_%d_1.mat', prefix, subj_info.subj_id, session_num)));
