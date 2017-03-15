@@ -181,7 +181,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
             simfilename=fullfile(out_path,sprintf('%s%s_%d.mat',prefix,subj_info.subj_id,session_num));
             sim=load(simfilename);
             reconcoreg=load(regfiles{meshind});
-            sim.D.other=greycoreg.D.other;
+            sim.D.other=reconcoreg.D.other;
             D=sim.D;
             copyfile(fullfile(out_path, sprintf('SPMgainmatrix_%s_%d_%dcoreg_1.mat', subj_info.subj_id, session_num, meshind)), fullfile(out_path, sprintf('SPMgainmatrix_%s%s_%d_1.mat', prefix, subj_info.subj_id, session_num)));
             D.other.inv{1}.gainmat=sprintf('SPMgainmatrix_%s%s_%d_1.mat', prefix, subj_info.subj_id, session_num);
