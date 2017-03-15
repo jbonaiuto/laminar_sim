@@ -87,15 +87,15 @@ end
 
 figure();
 subplot(2,1,1);
-barwitherr(perc_pial_stderr,perc_pial);
+barwitherr(perc_pial_stderr.*100,perc_pial.*100);
 set(gca,'XTickLabel',{'Free Energy','t Test'});
 legend(methodnames);
-ylim([0 1]);
+ylim([0 100]);
 ylabel('% Pial');
 
 subplot(2,1,2);
-barwitherr(perc_white_stderr,perc_white);
+barwitherr(perc_white_stderr.*100,perc_white.*100);
 set(gca,'XTickLabel',{'Free Energy','t Test'});
 legend(methodnames);
-ylim([0 1]);
+ylim([0 100]);
 ylabel('% White');
