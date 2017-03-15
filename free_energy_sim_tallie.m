@@ -149,7 +149,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
         matlabbatch{1}.spm.meeg.source.simulate.whatconditions.all = 1;
         matlabbatch{1}.spm.meeg.source.simulate.isinversion.setsources.woi = invwoi;
         matlabbatch{1}.spm.meeg.source.simulate.isinversion.setsources.isSin.foi = mean(invfoi);
-        matlabbatch{1}.spm.meeg.source.simulate.isinversion.setsources.dipmom = [params.dipole_moment -params.sim_patch_size];
+        matlabbatch{1}.spm.meeg.source.simulate.isinversion.setsources.dipmom = [params.dipole_moment params.sim_patch_size];
         matlabbatch{1}.spm.meeg.source.simulate.isinversion.setsources.locs = simpos;
         if abs(params.dipole_moment)>0
             matlabbatch{1}.spm.meeg.source.simulate.isSNR.setSNR = SNR;               
