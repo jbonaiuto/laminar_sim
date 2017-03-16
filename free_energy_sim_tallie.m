@@ -11,9 +11,9 @@ for f = fieldnames(defaults)',
 end
 
 % Copy already-inverted file
-rawfile=fullfile('D:\pred_coding\analysis\',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
+rawfile=fullfile('/data/pred_coding/analysis/',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
-out_path=fullfile('D:\layer_sim\results',subj_info.subj_id,num2str(session_num));
+out_path=fullfile('/data/layer_sim/results',subj_info.subj_id,num2str(session_num));
 if exist(out_path,'dir')~=7
     mkdir(out_path);
 end
@@ -85,37 +85,38 @@ spatialmodesnames={};
 
 for meshind=1:Nmesh,
     regfile=fullfile(out_path, sprintf('%s_%d_%dcoreg.mat',subj_info.subj_id,session_num,meshind));
-    clear jobs
-    matlabbatch=[];
-    matlabbatch{1}.spm.meeg.other.copy.D = {rawfile};
-    matlabbatch{1}.spm.meeg.other.copy.outfile = regfile;
-    spm_jobman('run', matlabbatch);
     regfiles{meshind}=regfile;
-
-    % Coregister simulated dataset to reconstruction mesh
-    matlabbatch=[];
-    matlabbatch{1}.spm.meeg.source.headmodel.D = {regfile};
-    matlabbatch{1}.spm.meeg.source.headmodel.val = 1;
-    matlabbatch{1}.spm.meeg.source.headmodel.comment = '';
-    matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.mri = {fullfile(params.mri_dir,[subj_info.subj_id subj_info.birth_date], [subj_info.headcast_t1 ',1'])};
-    matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.cortex = {deblank(allmeshes(meshind,:))};
-    matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.iskull = {''};
-    matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.oskull = {''};
-    matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.scalp = {''};
-    matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshres = 2;
-    matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).fidname = 'nas';
-    matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).specification.type = subj_info.nas;
-    matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).fidname = 'lpa';
-    matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).specification.type = subj_info.lpa;
-    matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).fidname = 'rpa';
-    matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).specification.type = subj_info.rpa;
-    matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.useheadshape = 0;
-    matlabbatch{1}.spm.meeg.source.headmodel.forward.eeg = 'EEG BEM';
-    matlabbatch{1}.spm.meeg.source.headmodel.forward.meg = 'Single Shell';            
-    spm_jobman('run', matlabbatch);
-            
+    if exist(regfile,'file')~=2
+        clear jobs
+        matlabbatch=[];
+        matlabbatch{1}.spm.meeg.other.copy.D = {rawfile};
+        matlabbatch{1}.spm.meeg.other.copy.outfile = regfile;
+        spm_jobman('run', matlabbatch);
+        
+        % Coregister simulated dataset to reconstruction mesh
+        matlabbatch=[];
+        matlabbatch{1}.spm.meeg.source.headmodel.D = {regfile};
+        matlabbatch{1}.spm.meeg.source.headmodel.val = 1;
+        matlabbatch{1}.spm.meeg.source.headmodel.comment = '';
+        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.mri = {fullfile(params.mri_dir,[subj_info.subj_id subj_info.birth_date], [subj_info.headcast_t1 ',1'])};
+        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.cortex = {deblank(allmeshes(meshind,:))};
+        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.iskull = {''};
+        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.oskull = {''};
+        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.scalp = {''};
+        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshres = 2;
+        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).fidname = 'nas';
+        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).specification.type = subj_info.nas;
+        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).fidname = 'lpa';
+        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).specification.type = subj_info.lpa;
+        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).fidname = 'rpa';
+        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).specification.type = subj_info.rpa;
+        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.useheadshape = 0;
+        matlabbatch{1}.spm.meeg.source.headmodel.forward.eeg = 'EEG BEM';
+        matlabbatch{1}.spm.meeg.source.headmodel.forward.meg = 'Single Shell';            
+        spm_jobman('run', matlabbatch);                   
+    end
     % Setup spatial modes for cross validation
-    spatialmodesname=fullfile(out_path, sprintf('%d_testmodes.mat',meshind));
+    spatialmodesname=fullfile(out_path, sprintf('%d_testmodes.mat',meshind));    
     [spatialmodesname,Nmodes,pctest]=spm_eeg_inv_prep_modes_xval(regfile, ideal_Nmodes, spatialmodesname, Nfolds, ideal_pctest);
     spatialmodesnames{meshind}=spatialmodesname;
 end
@@ -242,10 +243,10 @@ for methind=1:Nmeth,
         % num simulations x number of folds
         pialwhiteF=squeeze(allcrossF(simmeshind,:,2,methind)-allcrossF(simmeshind,:,1,methind));
         subplot(Nmesh,1,simmeshind);
-        bar(truotherF)
+        bar(pialwhiteF)
         xlabel('Simulation')
         ylabel('Free energy diff');
-        title(sprintf('Free energy, %s, %s-%s',methodnames{methind},simmeshname,othermeshname));        
+        title(sprintf('Free energy, %s, %s',methodnames{methind},simmeshname));        
 
     end
 
