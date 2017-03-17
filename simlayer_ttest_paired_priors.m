@@ -19,6 +19,7 @@ if exist(out_path,'dir')~=7
 end
 % New file to work with
 newfile=fullfile(out_path, sprintf('%s_%d.mat',subj_info.subj_id,session_num));
+greyregfile=fullfile(out_path, sprintf('%s_%d_greycoreg.mat',subj_info.subj_id,session_num));
 
 spm('defaults', 'EEG');
 spm_jobman('initcfg'); 
@@ -30,23 +31,27 @@ matlabbatch{1}.spm.meeg.other.copy.D = {rawfile};
 matlabbatch{1}.spm.meeg.other.copy.outfile = newfile;
 spm_jobman('run', matlabbatch);
 
+% Copy file to foi_dir
+clear jobs
+matlabbatch=[];
+matlabbatch{1}.spm.meeg.other.copy.D = {rawfile};
+matlabbatch{1}.spm.meeg.other.copy.outfile = greyregfile;
+spm_jobman('run', matlabbatch);
+
 % Load meshes
 orig_white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','white.hires.deformed.surf.gii');
 white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_white.hires.deformed.surf.gii');
-
 orig_pial_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','pial.hires.deformed.surf.gii');
 pial_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_pial.hires.deformed.surf.gii');
-
 pialwhite_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_white.hires.deformed-ds_pial.hires.deformed.surf.gii');
-
 simmeshes={white_mesh,pial_mesh};
 allmeshes={white_mesh,pial_mesh,pialwhite_mesh};
 
 % Create smoothed meshes
-patch_extent_mm=-5; %5 approx mm
+patch_extent_mm=5; %5 approx mm
 for meshind=1:length(allmeshes),
     [path,file,ext]=fileparts(allmeshes{meshind});
-    smoothedfile=fullfile(path, sprintf('FWHM5.00_%s.mat',file));
+    smoothedfile=fullfile(path, sprintf('FWHM%d.00_%s.mat',patch_extent_mm,file));
     if exist(smoothedfile,'file')~=2
         tic
         [smoothkern]=spm_eeg_smoothmesh_mm(allmeshes{meshind},abs(patch_extent_mm));
@@ -92,6 +97,34 @@ Nfolds=1;
 ideal_pctest=0;
 % Use all available spatial modes
 ideal_Nmodes=[];
+
+% Coregister simulated dataset to combined pial/white mesh
+matlabbatch=[];
+matlabbatch{1}.spm.meeg.source.headmodel.D = {greyregfile};
+matlabbatch{1}.spm.meeg.source.headmodel.val = 1;
+matlabbatch{1}.spm.meeg.source.headmodel.comment = '';
+matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.mri = {fullfile(params.mri_dir,[subj_info.subj_id subj_info.birth_date], [subj_info.headcast_t1 ',1'])};
+matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.cortex = {pialwhite_mesh};
+matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.iskull = {''};
+matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.oskull = {''};
+matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.scalp = {''};
+matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshres = 2;
+matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).fidname = 'nas';
+matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).specification.type = subj_info.nas;
+matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).fidname = 'lpa';
+matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).specification.type = subj_info.lpa;
+matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).fidname = 'rpa';
+matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).specification.type = subj_info.rpa;
+matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.useheadshape = 0;
+matlabbatch{1}.spm.meeg.source.headmodel.forward.eeg = 'EEG BEM';
+matlabbatch{1}.spm.meeg.source.headmodel.forward.meg = 'Single Shell';
+spm_jobman('run',matlabbatch);
+        
+% Setup spatial modes for cross validation
+spatialmodesname=fullfile(out_path, 'testmodes.mat');
+[spatialmodesname,Nmodes,pctest]=spm_eeg_inv_prep_modes_xval(greyregfile, ideal_Nmodes, spatialmodesname, Nfolds, ideal_pctest);
+
+greycoreg=load(greyregfile);
 
 for simmeshind=1:length(simmeshes)
     simmesh=simmeshes{simmeshind};
@@ -145,36 +178,14 @@ for simmeshind=1:length(simmeshes)
         end
         [a,b]=spm_jobman('run', matlabbatch);
         
-        % Load simulated dataset
-        simfilename=a{1}.D{1};        
-        %simfilename=fullfile(out_path,sprintf('%s%s_%d.mat',prefix,subj_info.subj_id,session_num));
-        Dsim=spm_eeg_load(simfilename);        
-        
-        % Coregister simulated dataset to combined pial/white mesh
-        matlabbatch=[];
-        matlabbatch{1}.spm.meeg.source.headmodel.D = {simfilename};
-        matlabbatch{1}.spm.meeg.source.headmodel.val = 1;
-        matlabbatch{1}.spm.meeg.source.headmodel.comment = '';
-        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.mri = {fullfile(params.mri_dir,[subj_info.subj_id subj_info.birth_date], [subj_info.headcast_t1 ',1'])};
-        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.cortex = {pialwhite_mesh};
-        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.iskull = {''};
-        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.oskull = {''};
-        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshes.custom.scalp = {''};
-        matlabbatch{1}.spm.meeg.source.headmodel.meshing.meshres = 2;
-        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).fidname = 'nas';
-        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(1).specification.type = subj_info.nas;
-        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).fidname = 'lpa';
-        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(2).specification.type = subj_info.lpa;
-        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).fidname = 'rpa';
-        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.fiducial(3).specification.type = subj_info.rpa;
-        matlabbatch{1}.spm.meeg.source.headmodel.coregistration.coregspecify.useheadshape = 0;
-        matlabbatch{1}.spm.meeg.source.headmodel.forward.eeg = 'EEG BEM';
-        matlabbatch{1}.spm.meeg.source.headmodel.forward.meg = 'Single Shell';
-        spm_jobman('run',matlabbatch);
-        
-        % Setup spatial modes for cross validation
-        spatialmodesname=[Dsim.path filesep 'testmodes.mat'];
-        [spatialmodesname,Nmodes,pctest]=spm_eeg_inv_prep_modes_xval(simfilename, ideal_Nmodes, spatialmodesname, Nfolds, ideal_pctest);
+        % Copy forward model from pial/white coregistered file
+        simfilename=fullfile(out_path,sprintf('%s%s_%d.mat',prefix,subj_info.subj_id,session_num));
+        sim=load(simfilename);
+        sim.D.other=greycoreg.D.other;
+        D=sim.D;
+        copyfile(fullfile(out_path, sprintf('SPMgainmatrix_%s_%d_greycoreg_1.mat', subj_info.subj_id, session_num)), fullfile(out_path, sprintf('SPMgainmatrix_%s%s_%d_1.mat', prefix, subj_info.subj_id, session_num)));
+        D.other.inv{1}.gainmat=sprintf('SPMgainmatrix_%s%s_%d_1.mat', prefix, subj_info.subj_id, session_num);
+        save(simfilename,'D');
                     
         % Resconstruct using each method
         for methind=1:Nmeth,       
@@ -192,7 +203,7 @@ for simmeshind=1:length(simmeshes)
             matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.hanning = 0;
             matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.isfixedpatch.fixedpatch.fixedfile = {patchfilename}; % '<UNDEFINED>';
             matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.isfixedpatch.fixedpatch.fixedrows = 1; %'<UNDEFINED>';
-            matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.patchfwhm =[patch_extent_mm]; %% NB A fiddle here- need to properly quantify
+            matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.patchfwhm =[-patch_extent_mm]; %% NB A fiddle here- need to properly quantify
             matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.mselect = 0;
             matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.nsmodes = Nmodes;
             matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.umodes = {spatialmodesname};
@@ -248,6 +259,7 @@ for simmeshind=1:length(simmeshes)
 
             write_metric_gifti(fullfile(out_path, sprintf('pial.%s.%s.gii',method,prefix)), pial_diff);
             write_metric_gifti(fullfile(out_path, sprintf('white.%s.%s.gii',method,prefix)), white_diff);
+
         end
         close all
         delete(fullfile(out_path, sprintf('sim_mesh%d_source%d*.*',simmeshind, s)));
