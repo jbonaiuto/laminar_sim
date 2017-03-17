@@ -13,7 +13,7 @@ end
 % Copy already-inverted file
 rawfile=fullfile('D:\pred_coding\analysis\',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
-out_path=fullfile('D:\layer_sim\ttest_results',subj_info.subj_id,num2str(session_num),sprintf('f%d_%d_SNR%d_dipolemoment%d',invfoi(1),invfoi(2),SNR,params.dipole_moment));
+out_path=fullfile('C:\layer_sim\ttest_results',subj_info.subj_id,num2str(session_num),sprintf('f%d_%d_SNR%d_dipolemoment%d',invfoi(1),invfoi(2),SNR,params.dipole_moment));
 if exist(out_path,'dir')~=7
     mkdir(out_path);
 end

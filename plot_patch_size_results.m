@@ -52,7 +52,8 @@ for idx=1:length(sim_patch_sizes)
             h=plot(x(thresh_idx),y(thresh_idx),'ro');
             set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
         end 
-        legend_labels{end+1}=sprintf('%s, AUC=%0.2f ,norm pAUC=%0.3f', method, auc, norm_p_auc);
+        %legend_labels{end+1}=sprintf('%s, AUC=%0.2f ,norm pAUC=%0.3f', method, auc, norm_p_auc);
+        legend_labels{end+1}=sprintf('%s, AUC=%0.2f', method, auc);
     end
     hold off;
     legend(legend_labels);

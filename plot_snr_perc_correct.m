@@ -114,4 +114,4 @@ legend(legend_labels);
 xlabel('SNR');
 ylabel('% Correct');
 %ylim([50 100]);
-ylim([35 100]);
+ylim([40 105]);
