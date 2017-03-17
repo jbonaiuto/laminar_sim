@@ -11,9 +11,9 @@ for f = fieldnames(defaults)',
 end
 
 % Copy already-inverted file
-rawfile=fullfile('D:\pred_coding\analysis\',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
+rawfile=fullfile('/data/pred_coding/analysis',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
-out_path=fullfile('C:\layer_sim\ttest_results',subj_info.subj_id,num2str(session_num),sprintf('f%d_%d_SNR%d_dipolemoment%d',invfoi(1),invfoi(2),SNR,params.dipole_moment));
+out_path=fullfile('/data/layer_sim/ttest_results',subj_info.subj_id,num2str(session_num),sprintf('f%d_%d_SNR%d_dipolemoment%d',invfoi(1),invfoi(2),SNR,params.dipole_moment));
 if exist(out_path,'dir')~=7
     mkdir(out_path);
 end
@@ -49,7 +49,7 @@ allmeshes={white_mesh,pial_mesh,pialwhite_mesh};
 patch_extent_mm=5; %5 approx mm
 for meshind=1:length(allmeshes),
     [path,file,ext]=fileparts(allmeshes{meshind});
-    smoothedfile=fullfile(path, sprintf('FWHM5.00_%s.mat',file));
+    smoothedfile=fullfile(path, sprintf('FWHM%d.00_%s.mat',patch_extent_mm,file));
     if exist(smoothedfile,'file')~=2
         tic
         [smoothkern]=spm_eeg_smoothmesh_mm(allmeshes{meshind},abs(patch_extent_mm));
