@@ -45,15 +45,12 @@ for i=1:length(methods_to_plot)
     end
     [x,y,t,auc]=compute_roc(f_scores(methind,:)',labels,params.nsims);
     plot(x,y,method_colors{i});
-    norm_p_auc=0;
     if min(t)<0 && max(t)>0
         thresh_idx=find(t==0);
-        p_auc=trapz(x(1:thresh_idx),y(1:thresh_idx));
-        norm_p_auc=p_auc/x(thresh_idx);
         h=plot(x(thresh_idx),y(thresh_idx),'o','MarkerEdgeColor','k','MarkerFaceColor','k');
         set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
     end
-    legend_labels{end+1}=sprintf('F, %s, AUC=%0.2f, norm pAUC=%0.2f',method, auc, norm_p_auc);        
+    legend_labels{end+1}=sprintf('F, %s, AUC=%0.2f',method, auc);        
 end
 
 data_dir=fullfile('D:\layer_sim\ttest_results', subj_info.subj_id, num2str(session_num), sprintf('f%d_%d_SNR%d_dipolemoment%d', freq(1), freq(2), snr, params.dipole_moment));
@@ -69,15 +66,12 @@ for i=1:length(methods_to_plot),
         
     [x,y,t,auc]=compute_roc(wmpial_t,labels,params.nsims);
     plot(x,y,sprintf('%s--',method_colors{i}));
-    norm_p_auc=0;
     if min(t)<-0.01 && max(t)>0.01
         thresh_idx=find(t==0);
-        p_auc=trapz(x(1:thresh_idx),y(1:thresh_idx));
-        norm_p_auc=p_auc/x(thresh_idx);
         h=plot(x(thresh_idx),y(thresh_idx),'o','MarkerEdgeColor','k','MarkerFaceColor','k');
         set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
     end 
-    legend_labels{end+1}=sprintf('t, %s, AUC=%.2f, norm pAUC=%.2f', methodnames{methind}, auc, norm_p_auc);
+    legend_labels{end+1}=sprintf('t, %s, AUC=%.2f', methodnames{methind}, auc);
 end
 hold off;
 legend(legend_labels);
