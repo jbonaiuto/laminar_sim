@@ -2,7 +2,7 @@ function plot_roc_curves(subj_info, session_num, freq, snr, varargin)
 
 % Parse inputs
 defaults = struct('nsims', 60, 'dipole_moment', 10, ...
-    'surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri');  %define default values
+    'surf_dir', 'd:\pred_coding\surf');  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -11,7 +11,8 @@ for f = fieldnames(defaults)',
 end
 
 methodnames={'EBB','IID','COH','MSP'}; %% just 1 method for now
-methods_to_plot=[1 4];
+%methods_to_plot=[1 4];
+methods_to_plot=[4];
 Nmeth=length(methodnames);
 
 orig_white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','white.hires.deformed.surf.gii');
