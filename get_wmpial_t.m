@@ -11,7 +11,7 @@ for f = fieldnames(defaults)',
 end
 
 file_name=fullfile(data_dir, sprintf('trials.%s.sim_mesh.mat', method));
-if exist(file_name,'file')~=2 || params.recompute
+if exist(file_name,'file')~=2 || params.recompute || params.recompute_trials
     wmpial_t=zeros(2*nsims,1);
     for simmeshind=1:2,    
         for s=1:nsims
