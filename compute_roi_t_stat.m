@@ -55,9 +55,7 @@ end
 
 % If threshold not specified - use 10% of max-min
 if length(params.threshold)==0
-    min_t=min([pial_tvals; wm_tvals]);
-    max_t=max([pial_tvals; wm_tvals]);
-    params.threshold=min_t+0.1*(max_t-min_t);
+    params.threshold=prctile([pial_tvals; wm_tvals],10);
 end
             
 % Create mask
