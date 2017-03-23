@@ -2,7 +2,7 @@ function plot_snr_perc_correct(subj_info, session_num, freq, snrs, varargin)
 
 % Parse inputs
 defaults = struct('nsims', 60, 'dipole_moment', 10, 'surf_dir', 'd:\pred_coding\surf', ...
-    'mri_dir', 'd:\pred_coding\mri','threshold',false);  %define default values
+    'threshold',false);  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
