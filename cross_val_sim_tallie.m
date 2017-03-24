@@ -11,9 +11,9 @@ for f = fieldnames(defaults)',
 end
 
 % Copy already-inverted file
-rawfile=fullfile('D:\pred_coding\analysis\',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
+rawfile=fullfile('/data/pred_coding/analysis',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
-out_path=fullfile('D:\layer_sim\results',subj_info.subj_id,num2str(session_num));
+out_path=fullfile('/data/layer_sim/results',subj_info.subj_id,num2str(session_num));
 if exist(out_path,'dir')~=7
     mkdir(out_path);
 end
@@ -246,7 +246,7 @@ for methind=1:Nmeth,
         bar(pialwhiteF)
         xlabel('Simulation')
         ylabel('Crossval Err Difference');
-        title(sprintf('Crossval Error, %s, %s-%s',methodnames{methind},simmeshname,othermeshname));        
+        title(sprintf('Crossval Error, %s, %s',methodnames{methind},simmeshname));        
     end
 
 end
