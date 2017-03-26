@@ -1,7 +1,7 @@
-function plot_crosserr_tval(subj_info, session_num, varargin)
+function plot_crosserr_tval(subj_info, session_num, freq, snr, varargin)
 
 % Parse inputs
-defaults = struct('nsims', 60, 'dipole_moment', 10, 'surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri');  %define default values
+defaults = struct('nsims', 60, 'dipole_moment', 10, 'surf_dir', 'd:\pred_coding\surf');  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -21,7 +21,8 @@ pial_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-syn
 simmeshes={white_mesh,pial_mesh};
 Nmesh=length(simmeshes);
 
-crosserr_file=fullfile('d:/layer_sim/results/',subj_info.subj_id,num2str(session_num),'allcrossErr_f15_30_SNR5.mat');
+crosserr_file=fullfile('d:/layer_sim/results/',subj_info.subj_id,num2str(session_num),...
+    sprintf('allcrossErr_f%d_%d_SNR%d_dipolemoment%d.mat',freq(1),freq(2),snr,params.dipole_moment));
 load(crosserr_file);
     
 meancrossErr=squeeze(mean(allcrossErr,5));
@@ -29,12 +30,13 @@ meancrossErr=squeeze(mean(allcrossErr,5));
 wmmeancrossErr=squeeze(meancrossErr(1,:,1,:)-meancrossErr(1,:,2,:));
 pialmeancrossErr=squeeze(meancrossErr(2,:,1,:)-meancrossErr(2,:,2,:));
 
+data_dir=fullfile('D:\layer_sim\ttest_results', subj_info.subj_id, num2str(session_num), ...
+    sprintf('f%d_%d_SNR%d_dipolemoment%d',freq(1),freq(2),snr,params.dipole_moment));
+
 for methind=1:Nmeth,           
     method=methodnames{methind};
-    figure();
+    figure();    
     
-    data_dir=fullfile('D:\layer_sim\ttest_results', subj_info.subj_id, num2str(session_num), 'f15_30_SNR5_dipolemoment10');
-
     wmpial_t=get_wmpial_t(data_dir, method, params.nsims, pial_mesh, ...
         white_mesh, orig_pial_mesh, orig_white_mesh);
            
