@@ -2,10 +2,8 @@ function plot_surface_statistic_free_energy(statistic, subj_info, session_num, f
 
 % Parse inputs
 defaults = struct('nsims', 60, 'snr', 5, 'dipole_moment', 10,...
-    'surf_dir', 'd:\pred_coding\surf','mri_dir', 'd:\pred_coding\mri',...
-    'clip_vals', true, 'limits', [], ...
-    'plot_dir', 'C:\Users\jbonai\Dropbox\meg\layer_sim',...
-    'diff',false);  %define default values
+    'surf_dir', 'd:\pred_coding\surf', 'clip_vals', true, 'limits', [], ...
+    'plot_dir', 'C:\Users\jbonai\Dropbox\meg\layer_sim');  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -140,15 +138,9 @@ for i=1:length(methods_to_plot),
         switch simmeshind
             case 1
                 sim_stats=wm_statistic(simvertind(1:params.nsims));
-                if params.diff
-                    sim_stats=sim_stats-wm_statistic(white_pial_map(simvertind(1:params.nsims)));
-                end
                 color='r';
             case 2
                 sim_stats=pial_statistic(simvertind(1:params.nsims));
-                if params.diff
-                    sim_stats=sim_stats-pial_statistic(pial_white_map(simvertind(1:params.nsims)));
-                end
                 color='b';
         end
         plot(sim_stats,truotherF,'o','MarkerEdgeColor','none','MarkerFaceColor',color);        
