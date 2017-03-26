@@ -1,7 +1,8 @@
-function plot_crosserr_f(subj_info, session_num, varargin)
+function plot_crosserr_f(subj_info, session_num, freq, snr, varargin)
 
 % Parse inputs
-defaults = struct('nsims', 60, 'surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri');  %define default values
+defaults = struct('nsims', 60, 'dipole_moment', 10, ...
+    'surf_dir', 'd:\pred_coding\surf');  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -9,9 +10,11 @@ for f = fieldnames(defaults)',
     end
 end
 
-crosserr_file=fullfile('d:/layer_sim/results/',subj_info.subj_id,num2str(session_num),'allcrossErr_f15_30_SNR5.mat');
+crosserr_file=fullfile('d:/layer_sim/results/',subj_info.subj_id,num2str(session_num),...
+    sprintf('allcrossErr_f%d_%d_SNR%d_dipolemoment%d.mat',freq(1),freq(2),snr,params.dipole_moment));
 load(crosserr_file);
-f_file=fullfile('d:/layer_sim/results/',subj_info.subj_id,num2str(session_num),'allcrossF_f15_30_SNR5_dipolemoment10.mat');
+f_file=fullfile('d:/layer_sim/results/',subj_info.subj_id,num2str(session_num),...
+    sprintf('allcrossF_f%d_%d_SNR%d_dipolemoment%d.mat',freq(1),freq(2),snr,params.dipole_moment));
 load(f_file);
 
 methodnames={'EBB','IID','COH','MSP'}; %% just 1 method for now
