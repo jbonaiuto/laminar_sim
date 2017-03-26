@@ -11,8 +11,7 @@ for f = fieldnames(defaults)',
 end
 
 methodnames={'EBB','IID','COH','MSP'}; %% just 1 method for now
-%methods_to_plot=[1 4];
-methods_to_plot=[4];
+methods_to_plot=[1 4];
 Nmeth=length(methodnames);
 
 orig_white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','white.hires.deformed.surf.gii');
