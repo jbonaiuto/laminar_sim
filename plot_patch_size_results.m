@@ -19,6 +19,9 @@ Nmesh=size(allmeshes,1);
 sim_patch_sizes=[5 5 10 10];
 reconstruct_patch_sizes=[5 10 5 10];
 
+labels=[-1*ones(params.nsims,1); 1*ones(params.nsims,1)];
+f_scores=zeros(length(methodnames),length(sim_patch_sizes),params.nsims*Nmesh);
+
 figure();
 for idx=1:length(sim_patch_sizes)
     sim_patch_size=sim_patch_sizes(idx);
@@ -39,8 +42,8 @@ for idx=1:length(sim_patch_sizes)
             pialWhiteF=squeeze(allcrossF(simmeshind,1:params.nsims,2,methind)-allcrossF(simmeshind,1:params.nsims,1,methind));
             scores(end+1:end+length(pialWhiteF))=pialWhiteF;     
         end        
-
-        labels=[-1*ones(params.nsims,1); 1*ones(params.nsims,1)];
+        f_scores(methind,idx,:)=scores;
+        
         [x,y,t,auc]=perfcurve(labels,scores,'1');
         plot(x,y);
         norm_p_auc=0;
@@ -61,3 +64,16 @@ for idx=1:length(sim_patch_sizes)
     xlabel('False Positive Rate');
     ylabel('True Positive Rate');
 end
+
+labels(find(labels<0))=0;
+[pvalue Wft Wtf]=pauc(squeeze(f_scores(4,2,:)),squeeze(f_scores(4,3,:)),labels);
+disp(sprintf('MSP, S5R10-S10R5, W_5-10=%.4f, W_10-5=%.4f, p=%.5f', Wft, Wtf, pvalue));
+
+[pvalue Wft Wtf]=pauc(squeeze(f_scores(1,2,:)),squeeze(f_scores(1,3,:)),labels);
+disp(sprintf('EBB, S5R10-S10R5, W_5-10=%.4f, W_10-5=%.4f, p=%.5f', Wft, Wtf, pvalue));
+
+[pvalue Webb Wmsp]=pauc(squeeze(f_scores(1,2,:)),squeeze(f_scores(4,2,:)),labels);
+disp(sprintf('S5R10, EBB-MSP, W_EBB=%.4f, W_MSP=%.4f, p=%.5f', Webb, Wmsp, pvalue));
+
+[pvalue Webb Wmsp]=pauc(squeeze(f_scores(1,3,:)),squeeze(f_scores(4,3,:)),labels);
+disp(sprintf('S10R5, EBB-MSP, W_EBB=%.4f, W_MSP=%.4f, p=%.5f', Webb, Wmsp, pvalue));
