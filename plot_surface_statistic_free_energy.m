@@ -47,7 +47,7 @@ switch statistic
         pial_statistic=compute_curvature(pial_mesh, 'curvature_type', 'mean');
         wm_statistic=compute_curvature(white_mesh, 'curvature_type', 'mean');
     case 'depth'
-        [pial_statistic,HS]=compute_sulcal_depth(pial);
+        [pial_statistic,HS]=compute_sulcal_depth(pial_mesh);
         mapping=dsearchn(HS.vertices,wm.vertices);
         wm_statistic=sqrt(sum((wm.vertices-HS.vertices(mapping,:)).^2,2));
     case 'lead_field_norm'
