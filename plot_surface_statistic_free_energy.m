@@ -35,10 +35,7 @@ pial_inflated=gifti(fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_
 pial_white_map=map_pial_to_white(white_mesh, pial_mesh, ...
         'mapType', 'link', 'origPial', orig_pial_mesh, ...
         'origWhite', orig_white_mesh);
-white_pial_map=map_white_to_pial(white_mesh, pial_mesh, ...
-        'mapType', 'link', 'origPial', orig_pial_mesh, ...
-        'origWhite', orig_white_mesh);
-
+    
 switch statistic
     case 'thickness'
         [pial_statistic, wm_statistic]=compute_thickness(pial_mesh, ...
@@ -73,6 +70,8 @@ switch statistic
         min_val=min([pial_statistic(:) wm_statistic(:)]);
         max_val=max([pial_statistic(:) wm_statistic(:)]);
         plot([min_val max_val],[min_val max_val],'r-');
+        mean((pial_statistic-wm_statistic(pial_white_map))./wm_statistic(pial_white_map))
+        std((pial_statistic-wm_statistic(pial_white_map))./wm_statistic(pial_white_map))
         xlabel(sprintf('Pial %s',statistic));
         ylabel(sprintf('White matter %s',statistic));
 end
