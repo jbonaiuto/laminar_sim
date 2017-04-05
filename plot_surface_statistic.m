@@ -1,14 +1,17 @@
-function plot_surface_statistic(statistic, subj_info, varargin)
+function [pial_statistic, wm_statistic]=plot_surface_statistic(statistic, subj_info, varargin)
 
 % Parse inputs
 defaults = struct('surf_dir', 'd:\pred_coding\surf', 'clip_vals', true, 'limits', [], ...
-    'plot_dir', 'C:\Users\jbonai\Dropbox\meg\layer_sim');  %define default values
+    'plot_dir', '');  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
         params.(f{1}) = defaults.(f{1});
     end
 end
+
+out_dir=fullfile(params.plot_dir,statistic);
+mkdir(out_dir);
 
 orig_white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','white.hires.deformed.surf.gii');
 white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_white.hires.deformed.surf.gii');
@@ -44,10 +47,9 @@ switch statistic
         wm_statistic=sqrt(sum((wm.vertices-HS.vertices(mapping,:)).^2,2));
     case 'lead_field_norm'
         D=spm_eeg_load('C:\Users\jbonai\Dropbox\meg\layer_sim\rgb_1_pial.mat');
-        pial_statistic=sqrt(sum(D.inv{1}.inverse.L.^2,1))';
-
+        pial_statistic=sqrt(sum(D.inv{1}.inverse.L.^2,1))';        
         D=spm_eeg_load('C:\Users\jbonai\Dropbox\meg\layer_sim\rgb_1_white.mat');
-        wm_statistic=sqrt(sum(D.inv{1}.inverse.L.^2,1))';
+        wm_statistic=sqrt(sum(D.inv{1}.inverse.L.^2,1))';        
 end
 
 switch statistic
@@ -68,8 +70,10 @@ switch statistic
         xlabel(sprintf('Pial %s',statistic));
         ylabel(sprintf('White matter %s',statistic));
 end
-%saveas(fig, fullfile(out_dir, sprintf('pial_white_%s.png', statistic)), 'png');
-%figure2eps(fig, fullfile(out_dir, sprintf('pial_white_%s.eps', statistic)), 10, '-opengl');
+if length(params.plot_dir)
+    saveas(fig, fullfile(params.plot_dir, sprintf('pial_white_%s.png', statistic)), 'png');
+    figure2eps(fig, fullfile(params.plot_dir, sprintf('pial_white_%s.eps', statistic)), 10, '-opengl');
+end
         
 [ax, metric_data]=plot_surface_metric(pial, pial_statistic, 'clip_vals', params.clip_vals, 'limits', params.limits);
 set(ax,'CameraViewAngle',5.338);
@@ -77,7 +81,9 @@ set(ax,'CameraTarget',[20.523 26.884 0.768]);
 set(ax,'CameraUpVector',[-0.052 0.926 0.375]);
 set(ax,'CameraPosition',[57.457 -626.649 1618.708]);
 fig=get(ax,'Parent');
-%saveas(fig, fullfile(out_dir, sprintf('pial_%s.png', statistic)), 'png');
+if length(params.plot_dir)
+    saveas(fig, fullfile(params.plot_dir, sprintf('pial_%s.png', statistic)), 'png');
+end
 
 [ax, metric_data]=plot_surface_metric(pial_inflated, pial_statistic, 'clip_vals', params.clip_vals, 'limits', params.limits);
 set(ax,'CameraViewAngle',5.338);
@@ -85,7 +91,9 @@ set(ax,'CameraTarget',[20.523 26.884 0.768]);
 set(ax,'CameraUpVector',[-0.052 0.926 0.375]);
 set(ax,'CameraPosition',[57.457 -626.649 1618.708]);
 fig=get(ax,'Parent');
-%saveas(fig, fullfile(out_dir, sprintf('pial_inflated_%s.png', statistic)), 'png');
+if length(params.plot_dir)
+    saveas(fig, fullfile(params.plot_dir, sprintf('pial_inflated_%s.png', statistic)), 'png');
+end
 
 [ax, metric_data]=plot_surface_metric(wm, wm_statistic, 'clip_vals', params.clip_vals, 'limits', params.limits);
 set(ax,'CameraViewAngle',5.338);
@@ -93,7 +101,9 @@ set(ax,'CameraTarget',[20.523 26.884 0.768]);
 set(ax,'CameraUpVector',[-0.052 0.926 0.375]);
 set(ax,'CameraPosition',[57.457 -626.649 1618.708]);
 fig=get(ax,'Parent');
-%saveas(fig, fullfile(out_dir, sprintf('wm_%s.png', statistic)), 'png');
+if length(params.plot_dir)
+    saveas(fig, fullfile(params.plot_dir, sprintf('wm_%s.png', statistic)), 'png');
+end
 
 [ax, metric_data]=plot_surface_metric(wm_inflated, wm_statistic, 'clip_vals', params.clip_vals, 'limits', params.limits);
 set(ax,'CameraViewAngle',5.338);
@@ -101,4 +111,6 @@ set(ax,'CameraTarget',[20.523 26.884 0.768]);
 set(ax,'CameraUpVector',[-0.052 0.926 0.375]);
 set(ax,'CameraPosition',[57.457 -626.649 1618.708]);
 fig=get(ax,'Parent');
-%saveas(fig, fullfile(out_dir, sprintf('wm_inflated_%s.png', statistic)), 'png');
+if length(params.plot_dir)
+    saveas(fig, fullfile(out_dir, sprintf('wm_inflated_%s.png', statistic)), 'png');
+end
