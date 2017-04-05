@@ -2,7 +2,7 @@ function tstat=compute_roi_t_stat(file_prefix, pial_meshname, wm_meshname, varar
 
 % Parse inputs
 defaults = struct('mapType', 'link', 'recompute', false, 'origPial', '',...
-    'origWhite', '', 'threshold',[]);  %define default values
+    'origWhite', '');  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -27,18 +27,23 @@ if exist(pial_t_filename,'file')~=2 || exist(wm_t_filename,'file')~=2 || exist(p
     pial_diff=gifti(fullfile(filepath,sprintf('pial.%s.gii',filename)));
     wm_diff=gifti(fullfile(filepath,sprintf('white.%s.gii',filename)));
             
-    % Compute correction for pial surface t-test
-    correction = 100.0*max(nanstd(pial_diff.cdata(:,:),[],2)); 
     % Run pial surface t-test
-    [tstat,pvals]=ttest_corrected(pial_diff.cdata(:,:)','correction',correction);    
+    varpop=nanvar([pial_diff.cdata(:,:) wm_diff.cdata(:,:)],[],2);
+    %varpop=nanvar(pial_diff.cdata(:,:),[],2);
+    [tstat,pvals]=ttest_corrected(pial_diff.cdata(:,:)','correction',.01*max(varpop));
+    %[tstat,pvals]=ttest_corrected(pial_diff.cdata(:,:)');
     pial_tvals=tstat';
+    %[H,pvals,ci,STATS]=ttest(pial_diff.cdata(:,:)');
+    %pial_tvals=STATS.tstat';
     write_metric_gifti(pial_t_filename, pial_tvals);
     
-    % Compute correction for wm surface t-test
-    correction = 100.0*max(nanstd(wm_diff.cdata(:,:),[],2));
     % Run wm surface t-test
-    [tstat,pvals]=ttest_corrected(wm_diff.cdata(:,:)','correction',correction);
+    %varpop=nanvar(wm_diff.cdata(:,:),[],2);
+    [tstat,pvals]=ttest_corrected(wm_diff.cdata(:,:)','correction',.01*max(varpop));
+    %[tstat,pvals]=ttest_corrected(wm_diff.cdata(:,:)');
     wm_tvals=tstat';
+    %[H,pvals,ci,STATS]=ttest(wm_diff.cdata(:,:)');
+    %wm_tvals=STATS.tstat';
     write_metric_gifti(wm_t_filename, wm_tvals);
             
     % Compute pial-white difference
@@ -53,18 +58,21 @@ else % Otherwise load data from files
     pial_wm_diff=x.cdata(:,:);
 end
 
-% If threshold not specified - use 10% of max-min
-if length(params.threshold)==0
-    params.threshold=prctile([pial_tvals; wm_tvals],10);
-end
-            
-% Create mask
-[pial_mask,wm_mask,mask]=get_pial_wm_mask(pial_tvals, wm_tvals, ...
-    params.threshold, pial_white_map);
-fprintf('ROI size=%d\n',length(mask));
+pial_threshold=prctile(pial_tvals(~isinf(pial_tvals)),95);
+% Create pial and white masks and mapped white mask
+pial_mask=find(pial_tvals>pial_threshold & ~isinf(pial_tvals));
+
+wm_threshold=prctile(wm_tvals(~isinf(wm_tvals)),95);
+wm_mask=find(wm_tvals>wm_threshold & ~isinf(wm_tvals));
+mapped_wm_tvals=wm_tvals(pial_white_map);
+mapped_wm_mask=find(mapped_wm_tvals>wm_threshold & ~isinf(mapped_wm_tvals));
+mask=union(pial_mask, mapped_wm_mask);
+        
 % Get mean pial-wm in ROI
 pial_wm_roi_diff=mean(pial_wm_diff(mask,:));
-% Compute t-stat correction
-correction=100*max(nanstd(pial_wm_diff,[],2));
 % Perform ROI t-stat
-[tstat,pvals]=ttest_corrected(pial_wm_roi_diff','correction',correction);
+%varpop=nanvar([pial_diff.cdata(:,:) wm_diff.cdata(:,:)],[],2);
+%[tstat,pvals]=ttest_corrected(pial_wm_roi_diff','correction',10*max(varpop));
+[H,pvals,ci,STATS]=ttest(pial_wm_roi_diff');
+tstat=STATS.tstat;
+fprintf('ROI size=%d, tstat=%.2f\n',length(mask),tstat);
