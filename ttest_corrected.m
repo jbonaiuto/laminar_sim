@@ -24,11 +24,11 @@ else
 end
 df = max(samplesize - 1,0);
 xmean = nanmean(x,dim);
-sdpop = nanstd(x,[],dim);
+varpop = nanvar(x,[],dim);
 if params.correction==0
-    params.correction=.01*max(sdpop);
+    params.correction=.01*max(varpop);
 end
-corrsdpop=sdpop+params.correction;
+corrsdpop=sqrt(varpop+params.correction);
 %ser = sdpop ./ sqrt(samplesize);
 ser = corrsdpop ./ sqrt(samplesize);
 tval = (xmean - m) ./ ser;
