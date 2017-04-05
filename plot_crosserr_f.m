@@ -37,8 +37,8 @@ for methind=1:length(methodnames)
     f=[wmF(:,methind); pialF(:,methind)];
 
     hold on;
-    plot(wmmeancrossErr(:,methind),wmF(:,methind),'or');
-    plot(pialmeancrossErr(:,methind),pialF(:,methind),'ob');
+    plot(wmmeancrossErr(:,methind),wmF(:,methind),'o','MarkerEdgeColor','none','MarkerFaceColor','r');
+    plot(pialmeancrossErr(:,methind),pialF(:,methind),'o','MarkerEdgeColor','none','MarkerFaceColor','b');
 
     [rho,pval] = corr(cve, f,'type','Spearman');    
     pPoly = polyfit(cve, f, 1); % Linear fit of xdata vs ydata
