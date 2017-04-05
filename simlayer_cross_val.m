@@ -1,4 +1,4 @@
-function free_energy_sim_tallie(subj_info, session_num, invfoi, SNR, varargin)
+function simlayer_cross_val(subj_info, session_num, invfoi, SNR, varargin)
 
 % Parse inputs
 defaults = struct('surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri',...
@@ -11,7 +11,7 @@ for f = fieldnames(defaults)',
 end
 
 % Copy already-inverted file
-rawfile=fullfile('d:/pred_coding/analysis/',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
+rawfile=fullfile('d:/pred_coding/analysis',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
 out_path=fullfile('d:/layer_sim/results',subj_info.subj_id,num2str(session_num));
 if exist(out_path,'dir')~=7
@@ -21,7 +21,7 @@ end
 newfile=fullfile(out_path, sprintf('%s_%d.mat',subj_info.subj_id,session_num));
 
 if length(params.out_file)==0
-    params.out_file=sprintf('allcrossF_f%d_%d_SNR%d_dipolemoment%d.mat',invfoi(1),invfoi(2),SNR,params.dipole_moment);
+    params.out_file=sprintf('allcrossErr_f%d_%d_SNR%d_dipolemoment%d.mat',invfoi(1),invfoi(2),SNR,params.dipole_moment);
 end
 
 spm('defaults', 'EEG');
@@ -68,9 +68,9 @@ Nmeth=length(methodnames);
 % Inversion parameters
 invwoi=[100 500];
 % Number of cross validation folds
-Nfolds=1;
+Nfolds=10;
 % Percentage of test channels in cross validation
-ideal_pctest=0;
+ideal_pctest=10; %% may not use this number as we need integer number of channels
 % Use all available spatial modes
 ideal_Nmodes=[];
 
@@ -78,7 +78,7 @@ ideal_Nmodes=[];
 % All F values and cross validation errors
 % meshes simulated on x number of simulations x meshes reconstructed onto x
 % num methods x num cross validation folds
-allcrossF=zeros(Nmesh,Nsim,Nmesh,Nmeth);
+allcrossErr=zeros(Nmesh,Nsim,Nmesh,Nmeth,Nfolds);
 
 regfiles={};
 spatialmodesnames={};
@@ -157,7 +157,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
         %% get location to simulate dipole on this mesh
         simpos=Dmesh.inv{1}.mesh.tess_mni.vert(simvertind(s),:); 
         prefix=sprintf('sim_mesh%d_source%d',simmeshind,s);
-
+        
         % Simulate source 
         matlabbatch=[];
         matlabbatch{1}.spm.meeg.source.simulate.D = {filename};
@@ -177,7 +177,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
         
         %% now reconstruct onto all the meshes and look at cross val and F vals
         for meshind=1:Nmesh,
-        
+            
             % Copy forward model from pial or white coregistered file
             simfilename=fullfile(out_path,sprintf('%s%s_%d.mat',prefix,subj_info.subj_id,session_num));
             sim=load(simfilename);
@@ -219,7 +219,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
                 
                 % Load inversion - get cross validation error end F
                 Drecon=spm_eeg_load(simfilename);                
-                allcrossF(simmeshind,s,meshind,methind)=Drecon.inv{1}.inverse.crossF;
+                allcrossErr(simmeshind,s,meshind,methind,:)=Drecon.inv{1}.inverse.crosserr;
                 
                 
             end; % for methind                        
@@ -227,7 +227,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
         close all;
     end; % for s (sources)
 end; % for simmeshind (simulatiom mesh)
-save(fullfile(out_path,params.out_file),'allcrossF');
+save(fullfile(out_path,params.out_file),'allcrossErr');
 
 for methind=1:Nmeth,                
     figure(methind);clf;
@@ -238,17 +238,15 @@ for methind=1:Nmeth,
         x=strsplit(file,'.');
         y=strsplit(x{1},'_');
         simmeshname=y{2};
-
+        
         % F reconstructed on true - reconstructed on other
         % num simulations x number of folds
-        pialwhiteF=squeeze(allcrossF(simmeshind,:,2,methind)-allcrossF(simmeshind,:,1,methind));
+        pialwhiteF=squeeze(mean(allcrossErr(simmeshind,:,2,methind,:),5)-mean(allcrossErr(simmeshind,:,1,methind,:),5));
         subplot(Nmesh,1,simmeshind);
         bar(pialwhiteF)
         xlabel('Simulation')
-        ylabel('Free energy diff');
-        title(sprintf('Free energy, %s, %s',methodnames{methind},simmeshname));        
-
+        ylabel('Crossval Err Difference');
+        title(sprintf('Crossval Error, %s, %s',methodnames{methind},simmeshname));        
     end
 
 end
-

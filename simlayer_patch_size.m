@@ -1,4 +1,4 @@
-function free_energy_sim_patch_size(subj_info, session_num, invfoi, SNR, varargin)
+function simlayer_patch_size(subj_info, session_num, invfoi, SNR, varargin)
 
 % Parse inputs
 defaults = struct('surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri',...
@@ -22,7 +22,7 @@ for sp=1:length(patch_sizes)
 
         out_file=sprintf('allcrossF_f%d_%d_SNR%d_dipolemoment%d_sim%d_reconstruct%d.mat',invfoi(1),invfoi(2),SNR,params.dipole_moment,sim_patch_size,reconstruct_patch_size);
 
-        free_energy_sim_tallie(subj_info, session_num, invfoi, SNR, 'surf_dir', params.surf_dir, 'mri_dir', params.mri_dir, 'out_file', out_file, 'dipole_moment', params.dipole_moment, 'sim_patch_size', sim_patch_size, 'reconstruct_patch_size', reconstruct_patch_size, 'nsims', params.nsims);
+        simlayer_free_energy(subj_info, session_num, invfoi, SNR, 'surf_dir', params.surf_dir, 'mri_dir', params.mri_dir, 'out_file', out_file, 'dipole_moment', params.dipole_moment, 'sim_patch_size', sim_patch_size, 'reconstruct_patch_size', reconstruct_patch_size, 'nsims', params.nsims);
 
     end
 end
