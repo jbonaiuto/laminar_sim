@@ -17,17 +17,9 @@ for f=1:size(files,1)
     n_combined_vertices=length(trial_mesh.cdata);
     n_vertices=round(n_combined_vertices/2);
 
-    c=file_array(fullfile(data_dir,['pial_' prefix '.dat']),[n_vertices 1],'FLOAT32-LE',0,1,0);
-    c(:)=trial_mesh.cdata(n_vertices+1:end);
-    pial_surf = gifti;
-    pial_surf.cdata = c;
-    save(pial_surf, fullfile(data_dir,['pial_' prefix '.gii']), 'ExternalFileBinary');
+    write_metric_gifti(fullfile(data_dir,['pial_' prefix]), trial_mesh.cdata(n_vertices+1:end,:));
 
-    c=file_array(fullfile(data_dir,['white_' prefix '.dat']),[n_vertices 1],'FLOAT32-LE',0,1,0);
-    c(:)=trial_mesh.cdata(1:n_vertices);
-    white_surf = gifti;
-    white_surf.cdata = c;
-    save(white_surf, fullfile(data_dir,['white_' prefix '.gii']), 'ExternalFileBinary');
+    write_metric_gifti(fullfile(data_dir,['white_' prefix]), trial_mesh.cdata(1:n_vertices,:));
 
     delete(fullfile(data_dir,[prefix '.dat']),fullfile(data_dir,[prefix '.gii']));
 end
