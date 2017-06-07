@@ -18,12 +18,13 @@ if exist(file_name,'file')~=2 || params.recompute || params.recompute_trials
             file_prefix=fullfile(data_dir,sprintf('%s.sim_mesh%d_source%d.gii',method,simmeshind,s));
             tstat=compute_roi_t_stat(file_prefix, pial_mesh, white_mesh,...
                 'mapType', 'link', 'origPial', orig_pial_mesh,...
-                'origWhite', orig_white_mesh, 'recompute', params.recompute_trials); 
+                'origWhite', orig_white_mesh,...
+                'recompute', params.recompute_trials); 
             wmpial_t((simmeshind-1)*nsims+s)=tstat;
         end
     end
     save(file_name, 'wmpial_t');
 else
     a=load(file_name);   
-    wmpial_t=a.wmpial_t;
+    wmpial_t=[a.wmpial_t(1:nsims); a.wmpial_t(length(a.wmpial_t)/2+1:length(a.wmpial_t)/2+nsims)];
 end
