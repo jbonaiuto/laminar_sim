@@ -1,8 +1,29 @@
 function simlayer_cross_val(subj_info, session_num, invfoi, SNR, varargin)
+% SIMLAYER_CROSS_VAL  Run simulations with whole brain - cross validation
+%   error analysis
+%
+% Use as
+%   simlayer_cross_val(subjects(1), 1, [10 30], -20)
+% where the first argument is the subject info structure (from create_subjects),
+% the second is the session number, the third is the frequency range, and
+% the fourth is the SNR (db).
+% 
+%   simlayer_cross_val(...,'param','value','param','value'...) allows
+%    additional param/value pairs to be used. Allowed parameters:
+%    * surf_dir - directory containing subject surfaces
+%    * mri_dir - directory containing subject MRIs
+%    * out_file - output file name (automatically generated if not
+%    specified)
+%    * dipole_moment - 10 (default) or interger - moment of simulated
+%    dipole
+%    * sim_patch_size - 0 (default) or interger - simulated patch size
+%    * reconstruct_patch_size - 0 (default) or interger - reconstruction patch size
+%    * nsims - 60 (default) or integer - number of simulations per surface
 
 % Parse inputs
 defaults = struct('surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri',...
-    'out_file', '', 'dipole_moment', 10, 'sim_patch_size', 5, 'reconstruct_patch_size', 5, 'nsims', 60);  %define default values
+    'out_file', '', 'dipole_moment', 10, 'sim_patch_size', 5,...
+    'reconstruct_patch_size', 5, 'nsims', 60);  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -11,7 +32,9 @@ for f = fieldnames(defaults)',
 end
 
 % Copy already-inverted file
-rawfile=fullfile('d:/pred_coding/analysis',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
+rawfile=fullfile('d:/pred_coding/analysis',subj_info.subj_id,...
+    num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30',...
+    sprintf('br%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
 out_path=fullfile('d:/layer_sim/results',subj_info.subj_id,num2str(session_num));
 if exist(out_path,'dir')~=7
@@ -21,7 +44,8 @@ end
 newfile=fullfile(out_path, sprintf('%s_%d.mat',subj_info.subj_id,session_num));
 
 if length(params.out_file)==0
-    params.out_file=sprintf('allcrossErr_f%d_%d_SNR%d_dipolemoment%d.mat',invfoi(1),invfoi(2),SNR,params.dipole_moment);
+    params.out_file=sprintf('allcrossErr_f%d_%d_SNR%d_dipolemoment%d.mat',...
+        invfoi(1),invfoi(2),SNR,params.dipole_moment);
 end
 
 spm('defaults', 'EEG');
@@ -62,7 +86,7 @@ patchfilename=fullfile(out_path, 'temppatch.mat');
 save(patchfilename,'Ip');
 
 % Inversion method to use
-methodnames={'EBB','IID','COH','MSP'}; %% just 1 method for now
+methodnames={'EBB','MSP'};
 Nmeth=length(methodnames);
 
 % Inversion parameters
@@ -73,12 +97,6 @@ Nfolds=10;
 ideal_pctest=10; %% may not use this number as we need integer number of channels
 % Use all available spatial modes
 ideal_Nmodes=[];
-
-
-% All F values and cross validation errors
-% meshes simulated on x number of simulations x meshes reconstructed onto x
-% num methods x num cross validation folds
-allcrossErr=zeros(Nmesh,Nsim,Nmesh,Nmeth,Nfolds);
 
 regfiles={};
 spatialmodesnames={};
@@ -120,7 +138,12 @@ for meshind=1:Nmesh,
     [spatialmodesname,Nmodes,pctest]=spm_eeg_inv_prep_modes_xval(regfile, ideal_Nmodes, spatialmodesname, Nfolds, ideal_pctest);
     spatialmodesnames{meshind}=spatialmodesname;
 end
-
+x=load(spatialmodesname);
+load(regfile);
+results.allCrossErr=zeros(Nmesh,Nsim,Nmesh,Nmeth,Nfolds,size(x.testchans,2));
+results.allRMS=zeros(Nmesh,Nsim,Nmesh,Nmeth,Nfolds,size(x.testchans,2));
+results.allFract=zeros(Nmesh,Nsim,Nmesh,Nmeth,Nfolds,size(x.testchans,2));
+results.allF=zeros(Nmesh,Nsim,Nmesh,Nmeth,Nfolds);
 
 % Simulate sources on each mesh
 for simmeshind=1:Nmesh, %% choose mesh to simulate on
@@ -206,7 +229,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.patchfwhm =[-params.reconstruct_patch_size]; %% NB A fiddle here- need to properly quantify
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.mselect = 0;
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.nsmodes = Nmodes;
-                matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.umodes = {spatialmodesnames{meshind}};
+                matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.umodes = {spatialmodesnames{simmeshind}};
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.ntmodes = [];
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.priors.priorsmask = {''};
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.priors.space = 1;
@@ -219,34 +242,15 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
                 
                 % Load inversion - get cross validation error end F
                 Drecon=spm_eeg_load(simfilename);                
-                allcrossErr(simmeshind,s,meshind,methind,:)=Drecon.inv{1}.inverse.crosserr;
+                results.allCrossErr(simmeshind,s,meshind,methind,:,:)=Drecon.inv{1}.inverse.crosserr;
+                results.allRMS(simmeshind,s,meshind,methind,:,:)=Drecon.inv{1}.inverse.allrms;
+                results.allFract(simmeshind,s,meshind,methind,:,:)=Drecon.inv{1}.inverse.allfract;
+                results.allF(simmeshind,s,meshind,methind,:)=Drecon.inv{1}.inverse.crossF;
                 
-                
-            end; % for methind                        
-        end; %% for reconstruction mesh (meshind)
+                save(fullfile(out_path,params.out_file),'results');
+            end
+        end
         close all;
-    end; % for s (sources)
-end; % for simmeshind (simulatiom mesh)
-save(fullfile(out_path,params.out_file),'allcrossErr');
-
-for methind=1:Nmeth,                
-    figure(methind);clf;
-
-    % For each simulated mesh
-    for simmeshind=1:Nmesh,
-        [path,file,ext]=fileparts(deblank(allmeshes(simmeshind,:)));
-        x=strsplit(file,'.');
-        y=strsplit(x{1},'_');
-        simmeshname=y{2};
-        
-        % F reconstructed on true - reconstructed on other
-        % num simulations x number of folds
-        pialwhiteF=squeeze(mean(allcrossErr(simmeshind,:,2,methind,:),5)-mean(allcrossErr(simmeshind,:,1,methind,:),5));
-        subplot(Nmesh,1,simmeshind);
-        bar(pialwhiteF)
-        xlabel('Simulation')
-        ylabel('Crossval Err Difference');
-        title(sprintf('Crossval Error, %s, %s',methodnames{methind},simmeshname));        
     end
-
 end
+save(fullfile(out_path,params.out_file),'results');
