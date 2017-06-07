@@ -1,8 +1,24 @@
-function [pial_statistic, wm_statistic]=plot_surface_statistic(statistic, subj_info, varargin)
+function [pial_statistic, wm_statistic]=plot_surface_statistic(statistic,...
+    subj_info, varargin)
+% PLOT_SURFACE_STATISTIC  Plot surface statistic
+%
+% Use as
+%   [pial_statistic, wm_statistic]=plot_surface_statistic('depth', subject(1))
+% where the first argument is the statistic (thickness, depth, curvature, or lead_field_norm,
+% and the second is the subject info structure (from create_subjects).
+% Returns the surface statistic on the pial and white matter surfaces
+% 
+%   plot_surface_statistic(...,'param','value','param','value'...) allows
+%    additional param/value pairs to be used. Allowed parameters:
+%    * surf_dir - directory containing subject surfaces
+%    * clip_vals - true (default) or boolean - whether or not to clip
+%    values at 95% positive and negative
+%    * limits - [] (default) or vector - color map limits
+%    * plot_dir - directory to save plots
 
 % Parse inputs
-defaults = struct('surf_dir', 'd:\pred_coding\surf', 'clip_vals', true, 'limits', [], ...
-    'plot_dir', '');  %define default values
+defaults = struct('surf_dir', 'd:\pred_coding\surf', 'clip_vals', true,...
+    'limits', [], 'plot_dir', '');  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -13,24 +29,34 @@ end
 out_dir=fullfile(params.plot_dir,statistic);
 mkdir(out_dir);
 
-orig_white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','white.hires.deformed.surf.gii');
-white_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_white.hires.deformed.surf.gii');
+% Original and downsampled white matter surface
+orig_white_mesh=fullfile(params.surf_dir,...
+    sprintf('%s%s-synth', subj_info.subj_id, subj_info.birth_date),'surf',...
+    'white.hires.deformed.surf.gii');
+white_mesh=fullfile(params.surf_dir,...
+    sprintf('%s%s-synth', subj_info.subj_id, subj_info.birth_date),'surf',...
+    'ds_white.hires.deformed.surf.gii');
+wm_inflated=gifti(fullfile(params.surf_dir,...
+    sprintf('%s%s-synth', subj_info.subj_id, subj_info.birth_date),'surf',...
+    'ds_white.hires.deformed_inflated.surf.gii'));
 
-orig_pial_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','pial.hires.deformed.surf.gii');
-pial_mesh=fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_pial.hires.deformed.surf.gii');
+% Original and downsampled pial surface
+orig_pial_mesh=fullfile(params.surf_dir,...
+    sprintf('%s%s-synth', subj_info.subj_id, subj_info.birth_date),'surf',...
+    'pial.hires.deformed.surf.gii');
+pial_mesh=fullfile(params.surf_dir,...
+    sprintf('%s%s-synth', subj_info.subj_id, subj_info.birth_date),'surf',...
+    'ds_pial.hires.deformed.surf.gii');
+pial_inflated=gifti(fullfile(params.surf_dir,...
+    sprintf('%s%s-synth', subj_info.subj_id, subj_info.birth_date),'surf',...
+    'ds_pial.hires.deformed_inflated.surf.gii'));
 
 allmeshes=strvcat(white_mesh, pial_mesh);
-Nmesh=size(allmeshes,1);
 
 wm=gifti(white_mesh);
 pial=gifti(pial_mesh);
-wm_inflated=gifti(fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_white.hires.deformed_inflated.surf.gii'));
-pial_inflated=gifti(fullfile(params.surf_dir,[subj_info.subj_id subj_info.birth_date '-synth'],'surf','ds_pial.hires.deformed_inflated.surf.gii'));
 
 pial_white_map=map_pial_to_white(white_mesh, pial_mesh, ...
-        'mapType', 'link', 'origPial', orig_pial_mesh, ...
-        'origWhite', orig_white_mesh);
-white_pial_map=map_white_to_pial(white_mesh, pial_mesh, ...
         'mapType', 'link', 'origPial', orig_pial_mesh, ...
         'origWhite', orig_white_mesh);
 
@@ -49,7 +75,7 @@ switch statistic
         D=spm_eeg_load('C:\Users\jbonai\Dropbox\meg\layer_sim\rgb_1_pial.mat');
         pial_statistic=sqrt(sum(D.inv{1}.inverse.L.^2,1))';        
         D=spm_eeg_load('C:\Users\jbonai\Dropbox\meg\layer_sim\rgb_1_white.mat');
-        wm_statistic=sqrt(sum(D.inv{1}.inverse.L.^2,1))';        
+        wm_statistic=sqrt(sum(D.inv{1}.inverse.L.^2,1))';                
 end
 
 switch statistic
