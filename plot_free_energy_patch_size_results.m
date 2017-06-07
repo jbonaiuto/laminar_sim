@@ -9,7 +9,7 @@ function plot_free_energy_patch_size_results(subj_info, session_num, freq,...
 % the second is the session numner, the third is the frequency range of the
 % simulated data (Hz), and the fourth is a vector of SNRs (db)
 % 
-%   compare_surface_statistic_free_energy(...,'param','value','param','value'...) allows
+%   plot_free_energy_patch_size_results(...,'param','value','param','value'...) allows
 %    additional param/value pairs to be used. Allowed parameters:
 %    * nsims - 60 (default) or integer - number of simulations per surface
 %    * dipole_moment - 10 (default) or integer - moment of simulated dipole
