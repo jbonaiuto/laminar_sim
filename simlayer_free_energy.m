@@ -1,8 +1,29 @@
 function simlayer_free_energy(subj_info, session_num, invfoi, SNR, varargin)
+% SIMLAYER_FREE_ENERGY  Run simulations with whole brain - free energy
+%   analysis
+%
+% Use as
+%   simlayer_free_energy(subjects(1), 1, [10 30], -20)
+% where the first argument is the subject info structure (from create_subjects),
+% the second is the session number, the third is the frequency range, and
+% the fourth is the SNR (db).
+% 
+%   simlayer_free_energy(...,'param','value','param','value'...) allows
+%    additional param/value pairs to be used. Allowed parameters:
+%    * surf_dir - directory containing subject surfaces
+%    * mri_dir - directory containing subject MRIs
+%    * out_file - output file name (automatically generated if not
+%    specified)
+%    * dipole_moment - 10 (default) or interger - moment of simulated
+%    dipole
+%    * sim_patch_size - 0 (default) or interger - simulated patch size
+%    * reconstruct_patch_size - 0 (default) or interger - reconstruction patch size
+%    * nsims - 60 (default) or integer - number of simulations per surface
 
 % Parse inputs
 defaults = struct('surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri',...
-    'out_file', '', 'dipole_moment', 10, 'sim_patch_size', 5, 'reconstruct_patch_size', 5, 'nsims', 60);  %define default values
+    'out_file', '', 'dipole_moment', 10, 'sim_patch_size', 5,...
+    'reconstruct_patch_size', 5, 'nsims', 60);  %define default values
 params = struct(varargin{:});
 for f = fieldnames(defaults)',
     if ~isfield(params, f{1}),
@@ -11,7 +32,7 @@ for f = fieldnames(defaults)',
 end
 
 % Copy already-inverted file
-rawfile=fullfile('d:/pred_coding/analysis/',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('r%s_%d.mat',subj_info.subj_id,session_num));
+rawfile=fullfile('d:/pred_coding/analysis/',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('br%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
 out_path=fullfile('d:/layer_sim/results',subj_info.subj_id,num2str(session_num));
 if exist(out_path,'dir')~=7
@@ -75,9 +96,7 @@ ideal_pctest=0;
 ideal_Nmodes=[];
 
 
-% All F values and cross validation errors
-% meshes simulated on x number of simulations x meshes reconstructed onto x
-% num methods x num cross validation folds
+% All F values
 allcrossF=zeros(Nmesh,Nsim,Nmesh,Nmeth);
 
 regfiles={};
@@ -206,7 +225,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.patchfwhm =[-params.reconstruct_patch_size]; %% NB A fiddle here- need to properly quantify
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.mselect = 0;
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.nsmodes = Nmodes;
-                matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.umodes = {spatialmodesnames{meshind}};
+                matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.umodes = {spatialmodesnames{simmeshind}};
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.ntmodes = [];
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.priors.priorsmask = {''};
                 matlabbatch{1}.spm.meeg.source.invertiter.isstandard.custom.priors.space = 1;
@@ -222,33 +241,11 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
                 allcrossF(simmeshind,s,meshind,methind)=Drecon.inv{1}.inverse.crossF;
                 
                 
-            end; % for methind                        
-        end; %% for reconstruction mesh (meshind)
+            end
+        end
         close all;
-    end; % for s (sources)
-end; % for simmeshind (simulatiom mesh)
+    end
+end
 save(fullfile(out_path,params.out_file),'allcrossF');
 
-for methind=1:Nmeth,                
-    figure(methind);clf;
-
-    % For each simulated mesh
-    for simmeshind=1:Nmesh,
-        [path,file,ext]=fileparts(deblank(allmeshes(simmeshind,:)));
-        x=strsplit(file,'.');
-        y=strsplit(x{1},'_');
-        simmeshname=y{2};
-
-        % F reconstructed on true - reconstructed on other
-        % num simulations x number of folds
-        pialwhiteF=squeeze(allcrossF(simmeshind,:,2,methind)-allcrossF(simmeshind,:,1,methind));
-        subplot(Nmesh,1,simmeshind);
-        bar(pialwhiteF)
-        xlabel('Simulation')
-        ylabel('Free energy diff');
-        title(sprintf('Free energy, %s, %s',methodnames{methind},simmeshname));        
-
-    end
-
-end
 

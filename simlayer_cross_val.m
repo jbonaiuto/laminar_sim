@@ -138,6 +138,8 @@ for meshind=1:Nmesh,
     [spatialmodesname,Nmodes,pctest]=spm_eeg_inv_prep_modes_xval(regfile, ideal_Nmodes, spatialmodesname, Nfolds, ideal_pctest);
     spatialmodesnames{meshind}=spatialmodesname;
 end
+
+% All CVErr, RMS, CVerr/RMS, and F
 x=load(spatialmodesname);
 load(regfile);
 results.allCrossErr=zeros(Nmesh,Nsim,Nmesh,Nmeth,Nfolds,size(x.testchans,2));
