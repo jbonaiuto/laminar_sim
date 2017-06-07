@@ -62,7 +62,7 @@ for idx=1:length(sim_patch_sizes)
     for methind=1:Nmeth,       
         for simmeshind=1:Nmesh,                            
             % F reconstructed on true - reconstructed on other
-            trueF=trueF;
+            trueF=squeeze(allcrossF(simmeshind,1:params.nsims,simmeshind,methind));
             otherF=squeeze(allcrossF(simmeshind,1:params.nsims,2-simmeshind+1,methind));
             f_trueOther(methind,idx,(simmeshind-1)*params.nsims+1:simmeshind*params.nsims)=trueF-otherF;
         end        
