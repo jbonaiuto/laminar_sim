@@ -16,8 +16,8 @@ function simlayer_free_energy(subj_info, session_num, invfoi, SNR, varargin)
 %    specified)
 %    * dipole_moment - 10 (default) or interger - moment of simulated
 %    dipole
-%    * sim_patch_size - 0 (default) or interger - simulated patch size
-%    * reconstruct_patch_size - 0 (default) or interger - reconstruction patch size
+%    * sim_patch_size - 5 (default) or interger - simulated patch size
+%    * reconstruct_patch_size - 5 (default) or interger - reconstruction patch size
 %    * nsims - 60 (default) or integer - number of simulations per surface
 
 % Parse inputs
@@ -32,9 +32,11 @@ for f = fieldnames(defaults)',
 end
 
 % Copy already-inverted file
-rawfile=fullfile('d:/pred_coding/analysis/',subj_info.subj_id, num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30', sprintf('br%s_%d.mat',subj_info.subj_id,session_num));
+rawfile=fullfile('d:/pred_coding/analysis/',subj_info.subj_id,...
+    num2str(session_num), 'grey_coreg\EBB\p0.4\instr\f15_30',...
+    sprintf('br%s_%d.mat',subj_info.subj_id,session_num));
 % Output directory
-out_path=fullfile('d:/layer_sim/results',subj_info.subj_id,num2str(session_num));
+out_path=fullfile('c:/layer_sim/results',subj_info.subj_id,num2str(session_num));
 if exist(out_path,'dir')~=7
     mkdir(out_path);
 end
@@ -42,7 +44,8 @@ end
 newfile=fullfile(out_path, sprintf('%s_%d.mat',subj_info.subj_id,session_num));
 
 if length(params.out_file)==0
-    params.out_file=sprintf('allcrossF_f%d_%d_SNR%d_dipolemoment%d.mat',invfoi(1),invfoi(2),SNR,params.dipole_moment);
+    params.out_file=sprintf('allcrossF_f%d_%d_SNR%d_dipolemoment%d.mat',...
+        invfoi(1),invfoi(2),SNR,params.dipole_moment);
 end
 
 spm('defaults', 'EEG');
@@ -98,6 +101,7 @@ ideal_Nmodes=[];
 
 % All F values
 allcrossF=zeros(Nmesh,Nsim,Nmesh,Nmeth);
+allcrossVE=zeros(Nmesh,Nsim,Nmesh,Nmeth);
 
 regfiles={};
 spatialmodesnames={};
@@ -239,6 +243,7 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
                 % Load inversion - get cross validation error end F
                 Drecon=spm_eeg_load(simfilename);                
                 allcrossF(simmeshind,s,meshind,methind)=Drecon.inv{1}.inverse.crossF;
+                allcrossVE(simmeshind,s,meshind,methind)=Drecon.inv{1}.inverse.VE;
                 
                 
             end
@@ -246,6 +251,6 @@ for simmeshind=1:Nmesh, %% choose mesh to simulate on
         close all;
     end
 end
-save(fullfile(out_path,params.out_file),'allcrossF');
+save(fullfile(out_path,params.out_file),'allcrossF','allcrossVE');
 
 
