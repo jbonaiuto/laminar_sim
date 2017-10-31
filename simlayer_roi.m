@@ -15,8 +15,8 @@ function simlayer_roi( subj_info, session_num, invfoi, SNR, varargin )
 %    specified)
 %    * dipole_moment - 10 (default) or interger - moment of simulated
 %    dipole
-%    * sim_patch_size - 0 (default) or interger - simulated patch size
-%    * reconstruct_patch_size - 0 (default) or interger - reconstruction patch size
+%    * sim_patch_size - 5 (default) or interger - simulated patch size
+%    * reconstruct_patch_size - 5 (default) or interger - reconstruction patch size
 
 % Parse inputs
 defaults = struct('surf_dir', 'd:\pred_coding\surf', 'mri_dir', 'd:\pred_coding\mri',...
