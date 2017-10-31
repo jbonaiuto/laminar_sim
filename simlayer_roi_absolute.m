@@ -1,6 +1,6 @@
 function simlayer_roi_absolute( subj_info, session_num, invfoi,...
     dipole_moment, white_noise, varargin )
-% SIMLAYER_ROI  Run simulations with ROI analysis, using absolute signal
+% SIMLAYER_ROI_ABSOLUTE  Run simulations with ROI analysis, using absolute signal
 % magnitude rather than set via SNR
 %
 % Use as

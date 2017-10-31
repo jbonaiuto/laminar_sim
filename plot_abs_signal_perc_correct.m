@@ -12,7 +12,7 @@ function plot_abs_signal_perc_correct(subj_info, session_num, freq, white_noises
 %   plot_abs_signal_perc_correct(...,'param','value','param','value'...) allows
 %    additional param/value pairs to be used. Allowed parameters:
 %    * nsims - 60 (default) or integer - number of simulations per surface
-%    * dipole_moment - 10 (default) or integer - moment of simulated dipole
+%    * dipole_moment - 20 (default) or integer - moment of simulated dipole
 %    * surf_dir - directory containing subject surfaces
 
 % Parse inputs

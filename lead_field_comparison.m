@@ -1,4 +1,14 @@
 function lead_field_comparison(subj_info, varargin)
+% LEAD_FIELD_COMPARISON  Compare lead field differences within and between
+% surfaces
+%
+% Use as
+%   lead_field_comparison(subjects(1))
+% where the first argument is the subject info structure (from create_subjects)
+% 
+%   lead_field_comparison(...,'param','value','param','value'...) allows
+%    additional param/value pairs to be used. Allowed parameters:
+%    * surf_dir - directory containing subject surfaces
 
 % Parse inputs
 defaults = struct('surf_dir', 'D:/pred_coding/surf');  %define default values

@@ -1,6 +1,6 @@
 function simlayer_free_energy_absolute(subj_info, session_num, invfoi,...
     dipole_moment, white_noise, varargin)
-% SIMLAYER_FREE_ENERGY  Run simulations with whole brain - free energy
+% SIMLAYER_FREE_ENERGY_ABSOLUTE  Run simulations with whole brain - free energy
 %   analysis, using absolute signal magnitude rather than set via SNR
 %
 % Use as

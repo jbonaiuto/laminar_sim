@@ -1,13 +1,14 @@
 function simlayer_roi_real_noise( subj_info, session_num, invfoi, dipole_moment, varargin )
-% SIMLAYER_ROI  Run simulations with ROI analysis
+% SIMLAYER_ROI_REAL_NOISE  Run simulations with ROI analysis using resting
+% state data as noise
 %
 % Use as
-%   simlayer_roi(subjects(1), 1, [10 30], 20)
+%   simlayer_roi_real_noise(subjects(1), 1, [10 30], 20)
 % where the first argument is the subject info structure (from create_subjects),
 % the second is the session number, the third is the frequency range, and
 % the fourth is the dipole moment (nAm).
 % 
-%   simlayer_roi(...,'param','value','param','value'...) allows
+%   simlayer_roi_real_noise(...,'param','value','param','value'...) allows
 %    additional param/value pairs to be used. Allowed parameters:
 %    * surf_dir - directory containing subject surfaces
 %    * mri_dir - directory containing subject MRIs

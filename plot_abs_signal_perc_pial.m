@@ -11,7 +11,7 @@ function plot_abs_signal_perc_pial(subj_info, session_num, freq, white_noises, v
 %   plot_abs_signal_perc_pial(...,'param','value','param','value'...) allows
 %    additional param/value pairs to be used. Allowed parameters:
 %    * nsims - 60 (default) or integer - number of simulations per surface
-%    * dipole_moment - 10 (default) or integer - moment of simulated dipole
+%    * dipole_moment - 20 (default) or integer - moment of simulated dipole
 %    * surf_dir - directory containing subject surfaces
 
 % Parse inputs
