@@ -30,7 +30,6 @@ alpha=1.0-0.05/2;
 t_thresh=tinv(alpha, dof);
 
 methodnames={'EBB','IID','COH','MSP'}; %% just 1 method for now
-methods_to_plot=[1 4];
 
 % Original and downsampled white matter surface
 orig_white_mesh=fullfile(params.surf_dir,...
@@ -54,9 +53,9 @@ Nmesh=length(simmeshes);
 load('fadedblue_map');
 cm=fadedblue_map;
 
-for i=1:length(methods_to_plot)
-    methind=methods_to_plot(i);
+for methind=1:length(methodnames)
     method=methodnames{methind};    
+    disp(method);
     
     figure();
     hold on;
@@ -64,6 +63,8 @@ for i=1:length(methods_to_plot)
     perc_pial_unthresholded=zeros(1,length(snrs)+1);
     stderr_perc_pial_unthresholded=zeros(1,length(snrs)+1);
     perc_pial_significant=zeros(1,length(snrs)+1);
+    
+    disp('whole brain');
     
     % Noise (-inf db)
     data_file=fullfile('D:\layer_sim\results\',subj_info.subj_id,...
@@ -82,6 +83,9 @@ for i=1:length(methods_to_plot)
     stderr_perc_pial_unthresholded(1)=std(pial_unthresholded)/sqrt(length(pial_unthresholded));
     perc_pial_significant(1)=mean(pial_significant);
         
+    pout=myBinomTest(sum(pial_unthresholded),length(pial_unthresholded),0.5,'two');
+    disp(sprintf('SNR=-inf, pial=%.2f, p=%.5f', perc_pial_unthresholded(1)*100.0, pout));
+    
     for s=1:length(snrs)
         snr=snrs(s);
         data_file=fullfile('D:\layer_sim\results\',subj_info.subj_id,...
@@ -99,10 +103,14 @@ for i=1:length(methods_to_plot)
         perc_pial_unthresholded(s+1)=mean(pial_unthresholded);
         stderr_perc_pial_unthresholded(s+1)=std(pial_unthresholded)/sqrt(length(pial_unthresholded));
         perc_pial_significant(s+1)=mean(pial_significant);
+        
+        pout=myBinomTest(sum(pial_unthresholded),length(pial_unthresholded),0.5,'two');
+        disp(sprintf('SNR=%d dB, pial=%.2f, p=%.5f', snr, perc_pial_unthresholded(s+1)*100.0, pout));
     end
     plot_fading_line([1.25*snrs(1) snrs], perc_pial_unthresholded.*100, ...
         stderr_perc_pial_unthresholded.*100, perc_pial_significant, cm, '-');
     
+    disp('ROI');
     perc_pial_unthresholded=zeros(1,length(snrs)+1);
     stderr_perc_pial_unthresholded=zeros(1,length(snrs)+1);
     perc_pial_significant=zeros(1,length(snrs)+1);
@@ -120,6 +128,9 @@ for i=1:length(methods_to_plot)
     perc_pial_unthresholded(1)=mean(pial_unthresholded);
     perc_pial_significant(1)=mean(pial_significant);
     stderr_perc_pial_unthresholded(1)=std(pial_unthresholded)/sqrt(length(pial_unthresholded));
+    
+    pout=myBinomTest(sum(pial_unthresholded),length(pial_unthresholded),0.5,'two');
+    disp(sprintf('SNR=-inf, pial=%.2f, p=%.5f', perc_pial_unthresholded(1)*100.0, pout));
         
     for s=1:length(snrs)
         snr=snrs(s);
@@ -135,6 +146,9 @@ for i=1:length(methods_to_plot)
         perc_pial_unthresholded(s+1)=mean(pial_unthresholded);
         stderr_perc_pial_unthresholded(s+1)=std(pial_unthresholded)/sqrt(length(pial_unthresholded));
         perc_pial_significant(s+1)=mean(pial_significant);
+        
+        pout=myBinomTest(sum(pial_unthresholded),length(pial_unthresholded),0.5,'two');
+        disp(sprintf('SNR=%d dB, pial=%.2f, p=%.5f', snr, perc_pial_unthresholded(s+1)*100.0, pout));
     end
     plot_fading_line([1.25*snrs(1) snrs], perc_pial_unthresholded.*100, ...
         stderr_perc_pial_unthresholded.*100, perc_pial_significant, cm, '--');
