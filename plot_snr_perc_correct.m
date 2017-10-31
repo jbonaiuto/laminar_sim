@@ -85,7 +85,7 @@ for methind=1:length(methodnames)
     perc_correct_significant(1)=mean(correct_significant);
     
     pout=myBinomTest(sum(correct_unthresholded),length(correct_unthresholded),0.5,'two');
-    disp(sprintf('SNR=-inf, accuracy=%.2f, p=%.5f', perc_correct_unthresholded(1)*100.0, pout));
+    disp(sprintf('SNR=-inf, perc=%.4f, p=%.5f', perc_correct_unthresholded(1), pout));
     
     for s=1:length(snrs)
         snr=snrs(s);
@@ -106,7 +106,7 @@ for methind=1:length(methodnames)
         perc_correct_significant(s+1)=mean(correct_significant);
         
         pout=myBinomTest(sum(correct_unthresholded),length(correct_unthresholded),0.5,'two');
-        disp(sprintf('SNR=%.2f dB, accuracy=%.2f, p=%.5f', snr, perc_correct_unthresholded(s+1)*100.0, pout));
+        disp(sprintf('SNR=%.2f dB, perc=%.4f, p=%.5f', snr, perc_correct_unthresholded(s+1), pout));
     end
     plot_fading_line([1.25*snrs(1) snrs], perc_correct_unthresholded.*100, ...
         stderr_perc_correct_unthresholded.*100, perc_correct_significant, cm, '-');       
@@ -132,7 +132,7 @@ for methind=1:length(methodnames)
     perc_correct_significant(1)=mean(correct_significant);
         
     pout=myBinomTest(sum(correct_unthresholded),length(correct_unthresholded),0.5,'two');
-    disp(sprintf('SNR=-inf, accuracy=%.2f, p=%.5f', perc_correct_unthresholded(1)*100.0, pout));
+    disp(sprintf('SNR=-inf, perc=%.4f, p=%.5f', perc_correct_unthresholded(1), pout));
     
     for s=1:length(snrs)
         snr=snrs(s);
@@ -150,7 +150,7 @@ for methind=1:length(methodnames)
         perc_correct_significant(s+1)=mean(correct_significant);
         
         pout=myBinomTest(sum(correct_unthresholded),length(correct_unthresholded),0.5,'two');
-        disp(sprintf('SNR=%.2f dB, accuracy=%.2f, p=%.5f', snr, perc_correct_unthresholded(s+1)*100.0, pout));
+        disp(sprintf('SNR=%.2f dB, perc=%.4f, p=%.5f', snr, perc_correct_unthresholded(s+1), pout));
     end
     plot_fading_line([1.25*snrs(1) snrs], perc_correct_unthresholded.*100, ...
         stderr_perc_correct_unthresholded.*100, perc_correct_significant, cm, '--');           
