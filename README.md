@@ -6,6 +6,7 @@ inversion algorithms"
 Requirements:
 * McNemarextest: http://www.mathworks.com/matlabcentral/fileexchange/6297
 * mengz: http://uk.mathworks.com/matlabcentral/fileexchange/37867
+* myBinomTest: https://uk.mathworks.com/matlabcentral/fileexchange/24813/
 * MEGSurfer: https://github.com/jbonaiuto/MEGsurfer
 
 
