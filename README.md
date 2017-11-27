@@ -17,19 +17,28 @@ Requirements:
 %%
 
 % Create subject structure
-  subjects=create_subject_structure();
+
+    subjects=create_subject_structure();
+
 
 % Run cross validation whole brain simulations
-  simlayer_cross_val(subjects(1), 1, [10 30], -20);
+
+    simlayer_cross_val(subjects(1), 1, [10 30], -20);
+
 
 % Run free energy whole brain simulations
-  simlayer_free_energy(subjects(1), 1, [10 30], -20);
+
+    simlayer_free_energy(subjects(1), 1, [10 30], -20);
+
 
 % Run ROI simulations
-  simlayer_roi(subjects(1), 1, [10 30], -20);
+
+    simlayer_roi(subjects(1), 1, [10 30], -20);
+
 
 % Run free energy - patch size simulations
-  simlayer_free_energy_patch_size(subjects(1), 1, [10 30], -20);
+
+    simlayer_free_energy_patch_size(subjects(1), 1, [10 30], -20);
 
 % Run ROI - patch size simulations
   simlayer_roi_patch_size(subjects(1), 1, [10 30], -20);
