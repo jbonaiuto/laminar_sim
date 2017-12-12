@@ -1,20 +1,24 @@
 MEG laminar simulations
-Simulation and analysis code for Bonaiuto, et al
-"Non-invasive laminar inference with MEG: Comparison of methods and source
-inversion algorithms"
+=======================
 
-Requirements:
+Simulation and analysis code for making global and local laminar inferences with MEG data. 
+
+> JJ Bonaiuto, HE Rossiter, SS Meyer, N Adams, S Little, MF Callaghan, F Dick, S Bestmann, GR Barnes<br>
+> **Non-invasive laminar inference with MEG: Comparison of methods and source inversion algorithms**<br>
+> NeuroImage 2017, http://www.sciencedirect.com/science/article/pii/S1053811917310145<br>
+> (bioRxiv link: https://www.biorxiv.org/content/early/2017/11/30/147215)
+
+## Requirements
+
 * McNemarextest: http://www.mathworks.com/matlabcentral/fileexchange/6297
 * mengz: http://uk.mathworks.com/matlabcentral/fileexchange/37867
 * myBinomTest: https://uk.mathworks.com/matlabcentral/fileexchange/24813/
 * MEGSurfer: https://github.com/jbonaiuto/MEGsurfer
 
 
-%%
+## Usage
 
-% To run simulations:
-
-%%
+### Running simulations
 
 % Create subject structure
 
@@ -46,12 +50,7 @@ Requirements:
     simlayer_roi_patch_size(subjects(1), 1, [10 30], -20);
 
 
-%% 
-
-% To analyze results
-
-%%
-
+### Analyzing results
 
 % Plot whole brain and ROI stats for each simulation
 
@@ -114,3 +113,6 @@ Requirements:
 % Compare surface statistic - free energy correlations
 
     compare_surface_statistic_free_energy(subjects(1), 1, [10 30]);
+
+## Support
+Email jbonaiuto@gmail.com with any questions.
